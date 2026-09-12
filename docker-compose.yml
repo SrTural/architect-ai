@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  architect-ai:
+    build: .
+    container_name: architect-ai
+    volumes:
+      - ./legacy_code:/app/legacy_code
+    environment:
+      - OLLAMA_HOST=http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
