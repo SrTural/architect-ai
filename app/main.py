@@ -18,17 +18,24 @@ from app.core.parser import Parser, ParserError
 from app.core.refactor_engine import RefactorEngine
 
 
-# ==== Konfiqurasiya ====
-LEGACY_FILE = "legacy_code/old_app.py"
-SEPARATOR = "=" * 60
+# ============================================================
+# Konfiqurasiya
+# ============================================================
+LEGACY_FILE: str = "legacy_code/old_app.py"
+SEPARATOR: str = "=" * 60
 
 
-# ==== CLI Rejimi ====
+# ============================================================
+# Köməkçi Funksiyalar
+# ============================================================
 def print_section(title: str) -> None:
     """Bölmə başlığını çap edir."""
     print(f"\n{SEPARATOR}\n{title}\n{SEPARATOR}")
 
 
+# ============================================================
+# CLI Rejimi
+# ============================================================
 def run_cli() -> int:
     """
     CLI rejimi: legacy kodu oxuyur, refaktor edir və nəticəni göstərir.
@@ -37,13 +44,19 @@ def run_cli() -> int:
         int: Exit kodu (0 = uğurlu, 1+ = xəta).
     """
     try:
+        # ==== 1. Kodu Oxu ====
         parser = Parser(LEGACY_FILE)
         old_code = parser.get_full_code()
-        print(f"✅ Yükləndi: {len(old_code)} simvol, {len(parser.get_functions())} funksiya")
+        print(
+            f"✅ Yükləndi: {len(old_code)} simvol, "
+            f"{len(parser.get_functions())} funksiya"
+        )
 
+        # ==== 2. Refaktor Et ====
         engine = RefactorEngine()
         result = engine.refactor(old_code)
 
+        # ==== 3. Nəticəni Göstər ====
         print_section("KÖHNƏ KOD (legacy)")
         print(result["old_code"])
 
@@ -55,6 +68,13 @@ def run_cli() -> int:
         print(f"Sintaksis : {status}")
         print(f"Cəhd sayı : {result['attempts']}")
 
+        # ==== 4. Xəbərdarlıqlar ====
+        warnings = result.get("warnings", [])
+        if warnings:
+            print("\n⚠️  XƏBƏRDARLIQLAR:")
+            for w in warnings:
+                print(f"   {w}")
+
         return 0 if result["valid_syntax"] else 1
 
     except ParserError as e:
@@ -65,7 +85,9 @@ def run_cli() -> int:
         return 3
 
 
-# ==== API Rejimi ====
+# ============================================================
+# API Rejimi
+# ============================================================
 def run_api() -> None:
     """API rejimi: FastAPI serverini işə salır."""
     import uvicorn
@@ -80,7 +102,9 @@ def run_api() -> None:
     )
 
 
-# ==== Entry Point ====
+# ============================================================
+# Entry Point
+# ============================================================
 def main() -> int:
     """
     Əsas giriş nöqtəsi.
@@ -101,7 +125,10 @@ def main() -> int:
     # Naməlum əmr
     if command not in commands:
         print(f"❌ Naməlum əmr: '{command}'", file=sys.stderr)
-        print(f"📌 Mövcud əmrlər: {', '.join(commands.keys())}", file=sys.stderr)
+        print(
+            f"📌 Mövcud əmrlər: {', '.join(commands.keys())}",
+            file=sys.stderr,
+        )
         return 64  # EX_USAGE
 
     handler = commands[command]
@@ -109,6 +136,9 @@ def main() -> int:
     return result if isinstance(result, int) else 0
 
 
+# ============================================================
+# İşə Salma
+# ============================================================
 if __name__ == "__main__":
     try:
         sys.exit(main())
